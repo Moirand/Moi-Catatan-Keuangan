@@ -1,0 +1,16 @@
+{
+  "wallet_groups": [
+    {
+      "id": 1,
+      "name": "Bank"
+    },
+    {
+      "id": 2,
+      "name": "Tunai"
+    },
+    {
+      "id": 3,
+      "name": "E-Wallet"
+    }
+  ]
+}

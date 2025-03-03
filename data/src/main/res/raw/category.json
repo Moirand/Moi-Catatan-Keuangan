@@ -1,0 +1,24 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Gaji",
+      "type": "Income"
+    },
+    {
+      "id": 2,
+      "name": "Dividen",
+      "type": "Income"
+    },
+    {
+      "id": 3,
+      "name": "Makanan",
+      "type": "Expense"
+    },
+    {
+      "id": 4,
+      "name": "Minuman",
+      "type": "Expense"
+    }
+  ]
+}

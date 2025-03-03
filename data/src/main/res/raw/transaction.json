@@ -1,0 +1,40 @@
+{
+  "transactions": [
+    {
+      "id": 1,
+      "dateTime": "2025-03-02T14:30:00Z",
+      "type": "Income",
+      "category_id": 2,
+      "from_wallet_id": 3,
+      "to_wallet_id": null,
+      "amount": "1000",
+      "transfer_fee": "0",
+      "note": null,
+      "receipt": null
+    },
+    {
+      "id": 2,
+      "dateTime": "2025-03-010T14:30:00Z",
+      "type": "Expense",
+      "category_id": 3,
+      "from_wallet_id": 2,
+      "to_wallet_id": null,
+      "amount": "5000",
+      "transfer_fee": "0",
+      "note": null,
+      "receipt": null
+    },
+    {
+      "id": 3,
+      "dateTime": "2025-03-010T10:30:00Z",
+      "type": "Transfer",
+      "category_id": null,
+      "from_wallet_id": 1,
+      "to_wallet_id": 2,
+      "amount": "5000",
+      "transfer_fee": "2500",
+      "note": null,
+      "receipt": null
+    }
+  ]
+}
