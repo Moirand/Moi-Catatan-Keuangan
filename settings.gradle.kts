@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Moi-Catatan-Keuangan"
 include(":app")
+include(":data")
+include(":domain")
