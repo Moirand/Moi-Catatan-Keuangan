@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.domain"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 24
@@ -33,11 +33,10 @@ android {
 }
 
 dependencies {
+    // Coroutine Flow
+    implementation(libs.coroutines.core)
+    implementation(libs.coroutines.android)
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    // Room
+    implementation(libs.androidx.room.ktx)
 }

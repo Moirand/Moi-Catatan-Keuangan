@@ -2,39 +2,39 @@
   "transactions": [
     {
       "id": 1,
-      "dateTime": "2025-03-02T14:30:00Z",
+      "date_time": "2025-03-02 04:30:00",
       "type": "Income",
       "category_id": 2,
       "from_wallet_id": 3,
       "to_wallet_id": null,
-      "amount": "1000",
-      "transfer_fee": "0",
+      "amount": 1000,
+      "transfer_fee": 0,
       "note": null,
       "receipt": null
     },
     {
       "id": 2,
-      "dateTime": "2025-03-010T14:30:00Z",
+      "date_time": "2025-03-10 14:30:00",
       "type": "Expense",
       "category_id": 3,
       "from_wallet_id": 2,
       "to_wallet_id": null,
-      "amount": "5000",
-      "transfer_fee": "0",
+      "amount": 5000,
+      "transfer_fee": 0,
       "note": null,
       "receipt": null
     },
     {
       "id": 3,
-      "dateTime": "2025-03-010T10:30:00Z",
+      "date_time": "2025-03-10 10:30:00",
       "type": "Transfer",
       "category_id": null,
       "from_wallet_id": 1,
       "to_wallet_id": 2,
-      "amount": "5000",
-      "transfer_fee": "2500",
+      "amount": 5000,
+      "transfer_fee": 2500,
       "note": null,
-      "receipt": null
+      "receipt": [255, 216, 255, 224, 0, 16, 74, 70, 73, 70, 0, 1, 2, 0, 0, 72, 0, 72, 0, 0, 255, 219]
     }
   ]
 }

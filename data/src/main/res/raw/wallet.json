@@ -1,21 +1,21 @@
 {
-  "wallet": [
+  "wallets": [
     {
       "id": 1,
       "name": "Mandiri",
-      "balance": "10000",
+      "balance": 10000,
       "wallet_group_id": 1
     },
     {
       "id": 2,
       "name": "Dompet",
-      "balance": "20000",
+      "balance": 20000,
       "wallet_group_id": 2
     },
     {
       "id": 3,
       "name": "GoPay",
-      "balance": "2000",
+      "balance": 2000,
       "wallet_group_id": 3
     }
   ]

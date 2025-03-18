@@ -34,7 +34,7 @@ data class Wallet(
     val name: String,
 
     @ColumnInfo(name = WalletColumn.COLUMN_BALANCE)
-    val balance: BigDecimal,
+    val balance: BigDecimal = BigDecimal.ZERO,
 
     @ColumnInfo(name = WalletColumn.COLUMN_WALLET_GROUP_ID)
     val walletGroupId: Int

@@ -21,13 +21,17 @@ import com.example.domain.constant.tableColumn.CategoryColumn
 import com.example.domain.constant.tableColumn.TransactionColumn
 import com.example.domain.constant.tableColumn.WalletColumn
 import com.example.domain.constant.tableColumn.WalletGroupColumn
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.concurrent.Executors
+import java.math.BigDecimal
 
 @Database(
     entities = [Category::class, Transaction::class, Wallet::class, WalletGroup::class],
-    version = 1
+    version = 1,
+    exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
@@ -38,7 +42,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun walletGroupDao(): WalletGroupDao
 
     companion object {
-
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -47,109 +50,99 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext, AppDatabase::class.java,
                     "moi-catatan-keuangan.db"
-                ).addCallback(object : Callback() {
-                    override fun onCreate(db: SupportSQLiteDatabase) {
-                        super.onCreate(db)
-                        INSTANCE?.let {
-                            Executors.newSingleThreadExecutor().execute {
-                                fillWithStartingData(context)
+                ).fallbackToDestructiveMigration()
+                    .addCallback(object : Callback() {
+                        override fun onCreate(db: SupportSQLiteDatabase) {
+                            super.onCreate(db)
+                            CoroutineScope(Dispatchers.IO).launch {
+                                fillWithStartingData(context, getInstance(context))
                             }
                         }
-                    }
-                }).build()
+                    }).build()
                 INSTANCE = instance
                 instance
             }
         }
 
-        private fun fillWithStartingData(context: Context) {
+        private fun fillWithStartingData(context: Context, database: AppDatabase) {
             try {
-                // Load category data from JSON files and insert into the database
-                loadJsonArray(
-                    context,
-                    R.raw.category,
-                    CategoryColumn.TABLE_NAME
-                )?.let { jsonArray ->
-                    jsonArray.toList {
+                val dataMap = mapOf(
+                    R.raw.category to Pair(CategoryColumn.TABLE_NAME) { obj: JSONObject ->
                         Category(
-                            id = it.getInt(CategoryColumn.COLUMN_ID),
-                            name = it.getString(CategoryColumn.COLUMN_NAME),
-                            type = CategoryType.valueOf(it.getString(CategoryColumn.COLUMN_TYPE).uppercase())
+                            id = obj.getInt(CategoryColumn.COLUMN_ID),
+                            name = obj.getString(CategoryColumn.COLUMN_NAME),
+                            type = CategoryType.valueOf(obj.getString(CategoryColumn.COLUMN_TYPE))
                         )
-                    }.also { INSTANCE?.categoryDao()?.insertCategories(it as List<Category>) }
-                }
-
-                // Load wallet group data from JSON files and insert into the database
-                loadJsonArray(
-                    context,
-                    R.raw.wallet_group,
-                    WalletGroupColumn.TABLE_NAME
-                )?.let { jsonArray ->
-                    jsonArray.toList {
+                    },
+                    R.raw.wallet_group to Pair(WalletGroupColumn.TABLE_NAME) { obj: JSONObject ->
                         WalletGroup(
-                            id = it.getInt(WalletGroupColumn.COLUMN_ID),
-                            name = it.getString(WalletGroupColumn.COLUMN_NAME)
+                            id = obj.getInt(WalletGroupColumn.COLUMN_ID),
+                            name = obj.getString(WalletGroupColumn.COLUMN_NAME)
                         )
-                    }.also { INSTANCE?.walletGroupDao()?.insertWalletGroups(it as List<WalletGroup>) }
-                }
-
-                // Load wallet data from JSON files and insert into the database
-                loadJsonArray(context, R.raw.wallet, WalletColumn.TABLE_NAME)?.let { jsonArray ->
-                    jsonArray.toList {
+                    },
+                    R.raw.wallet to Pair(WalletColumn.TABLE_NAME) { obj: JSONObject ->
                         Wallet(
-                            id = it.getInt(WalletColumn.COLUMN_ID),
-                            name = it.getString(WalletColumn.COLUMN_NAME),
-                            balance = it.getString(WalletColumn.COLUMN_BALANCE).toBigDecimal(),
-                            walletGroupId = it.getInt(WalletColumn.COLUMN_WALLET_GROUP_ID)
+                            id = obj.getInt(WalletColumn.COLUMN_ID),
+                            name = obj.getString(WalletColumn.COLUMN_NAME),
+                            balance = BigDecimal(obj.getString(WalletColumn.COLUMN_BALANCE)),
+                            walletGroupId = obj.getInt(WalletColumn.COLUMN_WALLET_GROUP_ID)
                         )
-                    }.also { INSTANCE?.walletDao()?.insertWallets(it as List<Wallet>) }
-                }
-
-                // Load transaction data from JSON files and insert into the database
-                loadJsonArray(
-                    context,
-                    R.raw.transaction,
-                    TransactionColumn.TABLE_NAME
-                )?.let { jsonArray ->
-                    jsonArray.toList {
+                    },
+                    R.raw.transaction to Pair(TransactionColumn.TABLE_NAME) { obj: JSONObject ->
                         Transaction(
-                            id = it.getInt(TransactionColumn.COLUMN_ID),
-                            dateTime = it.getString(TransactionColumn.COLUMN_DATE_TIME),
-                            type = TransactionType.valueOf(
-                                it.getString(TransactionColumn.COLUMN_TYPE).uppercase()
-                            ),
-                            categoryId = it.optInt(TransactionColumn.COLUMN_CATEGORY_ID, 0),
-                            fromWalletId = it.optInt(TransactionColumn.COLUMN_FROM_WALLET_ID, 0),
-                            toWalletId = it.optInt(TransactionColumn.COLUMN_TO_WALLET_ID, 0),
-                            amount = it.getString(TransactionColumn.COLUMN_AMOUNT).toBigDecimal(),
-                            transferFee = it.getString(TransactionColumn.COLUMN_TRANSFER_FEE).toBigDecimal(),
-                            note = it.optString(TransactionColumn.COLUMN_NOTE, null),
-                            receipt = it.optJSONArray(TransactionColumn.COLUMN_RECEIPT)?.toByteArray() ?: byteArrayOf()
+                            id = obj.getInt(TransactionColumn.COLUMN_ID),
+                            dateTime = obj.getString(TransactionColumn.COLUMN_DATE_TIME),
+                            type = TransactionType.valueOf(obj.getString(TransactionColumn.COLUMN_TYPE)),
+                            categoryId = obj.optIntOrNull(TransactionColumn.COLUMN_CATEGORY_ID),
+                            fromWalletId = obj.optInt(TransactionColumn.COLUMN_FROM_WALLET_ID),
+                            toWalletId = obj.optIntOrNull(TransactionColumn.COLUMN_TO_WALLET_ID),
+                            amount = BigDecimal(obj.getString(TransactionColumn.COLUMN_AMOUNT)),
+                            transferFee = BigDecimal(obj.getString(TransactionColumn.COLUMN_TRANSFER_FEE)),
+                            note = obj.optStringOrNull(TransactionColumn.COLUMN_NOTE),
+                            receipt = obj.optJSONArray(TransactionColumn.COLUMN_RECEIPT)?.toByteArray()
                         )
-                    }.also { INSTANCE?.transactionDao()?.insertTransactions(it as List<Transaction>) }
+                    }
+                )
+
+                dataMap.forEach { (jsonFile, pair) ->
+                    loadJsonArray(context, jsonFile, pair.first)?.toList(pair.second)?.let {
+                        insertData(database, pair.first, it)
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
 
-        private fun loadJsonArray(context: Context, jsonRaw: Int, key: String): JSONArray? {
-            return try {
-                context.resources.openRawResource(jsonRaw).bufferedReader().use { reader ->
-                    JSONObject(reader.readText()).optJSONArray(key)
+        private fun insertData(database: AppDatabase, tableName: String, data: List<Any>) {
+            when (tableName) {
+                CategoryColumn.TABLE_NAME -> database.categoryDao().insertCategories(data as List<Category>)
+                WalletGroupColumn.TABLE_NAME -> database.walletGroupDao().insertWalletGroups(data as List<WalletGroup>)
+                WalletColumn.TABLE_NAME -> database.walletDao().insertWallets(data as List<Wallet>)
+                TransactionColumn.TABLE_NAME -> database.transactionDao().insertTransactions(data as List<Transaction>)
+            }
+        }
+
+        private fun loadJsonArray(context: Context, jsonRaw: Int, key: String): JSONArray? =
+            try {
+                context.resources.openRawResource(jsonRaw).bufferedReader().use {
+                    JSONObject(it.readText()).optJSONArray(key)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 null
             }
-        }
 
-        private fun JSONArray.toList(transform: (JSONObject) -> Any): List<Any> {
-            return List(length()) { index -> transform(getJSONObject(index)) }
-        }
+        private fun JSONArray.toList(transform: (JSONObject) -> Any): List<Any> =
+            List(length()) { index -> transform(getJSONObject(index)) }
 
-        private fun JSONArray.toByteArray(): ByteArray {
-            return ByteArray(length()) { index -> getInt(index).toByte() }
-        }
+        private fun JSONArray.toByteArray(): ByteArray =
+            ByteArray(length()) { index -> getInt(index).toByte() }
+
+        private fun JSONObject.optIntOrNull(key: String): Int? =
+            opt(key)?.let { if (it is Int) it else null }
+
+        private fun JSONObject.optStringOrNull(key: String): String? =
+            opt(key)?.let { if (it is String) it else null }
     }
 }

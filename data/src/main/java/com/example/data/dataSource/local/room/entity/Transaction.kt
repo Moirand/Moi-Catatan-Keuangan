@@ -48,25 +48,25 @@ data class Transaction(
     val type: TransactionType,
 
     @ColumnInfo(name = TransactionColumn.COLUMN_CATEGORY_ID)
-    val categoryId: Int?,
+    val categoryId: Int? = null,
 
     @ColumnInfo(name = TransactionColumn.COLUMN_FROM_WALLET_ID)
     val fromWalletId: Int,
 
     @ColumnInfo(name = TransactionColumn.COLUMN_TO_WALLET_ID)
-    val toWalletId: Int?,
+    val toWalletId: Int? = null,
 
     @ColumnInfo(name = TransactionColumn.COLUMN_AMOUNT)
-    val amount: BigDecimal,
+    val amount: BigDecimal = BigDecimal.ZERO,
 
     @ColumnInfo(name = TransactionColumn.COLUMN_TRANSFER_FEE)
-    val transferFee: BigDecimal,
+    val transferFee: BigDecimal = BigDecimal.ZERO,
 
     @ColumnInfo(name = TransactionColumn.COLUMN_NOTE)
-    val note: String?,
+    val note: String? = null,
 
     @ColumnInfo(name = TransactionColumn.COLUMN_RECEIPT, typeAffinity = ColumnInfo.BLOB)
-    val receipt: ByteArray?
+    val receipt: ByteArray? = null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -75,11 +75,11 @@ data class Transaction(
         other as Transaction
 
         if (id != other.id) return false
-        if (dateTime != other.dateTime) return false
-        if (type != other.type) return false
         if (categoryId != other.categoryId) return false
         if (fromWalletId != other.fromWalletId) return false
         if (toWalletId != other.toWalletId) return false
+        if (dateTime != other.dateTime) return false
+        if (type != other.type) return false
         if (amount != other.amount) return false
         if (transferFee != other.transferFee) return false
         if (note != other.note) return false
@@ -93,11 +93,11 @@ data class Transaction(
 
     override fun hashCode(): Int {
         var result = id
-        result = 31 * result + dateTime.hashCode()
-        result = 31 * result + type.hashCode()
         result = 31 * result + (categoryId ?: 0)
         result = 31 * result + fromWalletId
         result = 31 * result + (toWalletId ?: 0)
+        result = 31 * result + dateTime.hashCode()
+        result = 31 * result + type.hashCode()
         result = 31 * result + amount.hashCode()
         result = 31 * result + transferFee.hashCode()
         result = 31 * result + (note?.hashCode() ?: 0)
