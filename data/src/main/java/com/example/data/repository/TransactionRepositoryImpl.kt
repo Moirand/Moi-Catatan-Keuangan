@@ -1,6 +1,5 @@
 package com.example.data.repository
 
-import android.util.Log
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.data.dataSource.local.room.dao.TransactionDao
 import com.example.data.toDomain
@@ -35,11 +34,8 @@ class TransactionRepositoryImpl(
 
     override fun calculateAmounts(query: SimpleSQLiteQuery): Flow<UiState<BigDecimal>> =
         flow {
-            Log.d("Andre", "${transactionDao.calculateAmounts(query)}")
             emit(UiState.Loading())
-            emit(UiState.Success(transactionDao.calculateAmounts(query).also {
-                Log.d("Andre", "$it")
-            }))
+            emit(UiState.Success(transactionDao.calculateAmounts(query)))
         }.catch { e ->
             emit(UiState.Error(e.message.toString()))
         }.flowOn(Dispatchers.IO)

@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.moi_catatan_keuangan"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.moi_catatan_keuangan"
@@ -40,7 +40,21 @@ android {
 }
 
 dependencies {
+    implementation(project(":di"))
+    implementation(project(":domain"))
 
+    // Koin
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.compose)
+
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+
+    // Generated
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

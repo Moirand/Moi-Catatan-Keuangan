@@ -33,7 +33,13 @@ import java.math.BigDecimal
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index(value = [TransactionColumn.COLUMN_DATE_TIME, TransactionColumn.COLUMN_TYPE, TransactionColumn.COLUMN_CATEGORY_ID, TransactionColumn.COLUMN_FROM_WALLET_ID])]
+    indices = [
+        Index(value = [TransactionColumn.COLUMN_DATE_TIME]),
+        Index(value = [TransactionColumn.COLUMN_TYPE]),
+        Index(value = [TransactionColumn.COLUMN_CATEGORY_ID]),
+        Index(value = [TransactionColumn.COLUMN_FROM_WALLET_ID]),
+        Index(value = [TransactionColumn.COLUMN_TO_WALLET_ID]),
+    ]
 )
 
 data class Transaction(
