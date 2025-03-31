@@ -10,4 +10,6 @@ interface TransactionRepository {
     fun getTransactions(query: SimpleSQLiteQuery): Flow<UiState<List<TransactionDomain?>>>
     fun getTransactionById(transactionId: Int): Flow<UiState<TransactionDomain?>>
     fun calculateAmounts(query: SimpleSQLiteQuery): Flow<UiState<BigDecimal>>
+    fun insertTransaction(transaction: TransactionDomain): Flow<UiState<Unit>>
+    fun deleteTransaction(transactionId: Int): Flow<UiState<Unit>>
 }

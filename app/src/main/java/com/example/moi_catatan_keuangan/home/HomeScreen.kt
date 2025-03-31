@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -47,7 +48,10 @@ import com.example.domain.constant.TransactionType
 import com.example.domain.model.TransactionDetailDomain
 import com.example.moi_catatan_keuangan.component.TransactionListItemHome
 import com.example.moi_catatan_keuangan.utils.reformatDateTime
-import com.example.moi_catatan_keuangan.utils.toDecimalFormat
+import com.example.moi_catatan_keuangan.utils.toCurrencyFormat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -124,16 +128,36 @@ fun HomeScreen(
             onDismissRequest = { openBottomSheet = false },
             sheetState = modalBottomSheetState,
             containerColor = Color(0xFFFFFAFA),
-            content = { ModalBottomSheetContent(viewModel.selectedTransaction) },
+            content = {
+                ModalBottomSheetContent(
+                    transactionData = viewModel.selectedTransaction,
+                    onDelete = { transactionId ->
+                        CoroutineScope(Dispatchers.IO).launch {
+                            viewModel.deleteTransaction(transactionId).collect {
+                                when (it) {
+                                    is UiState.Loading -> {}
+                                    is UiState.Error -> {
+                                        Log.d("Andre", "onDelete: ${it.message}")
+                                    }
+
+                                    is UiState.Success -> {
+                                        openBottomSheet = false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                )
+            },
         )
     }
 
     MainContent(
         currentMonthYear = currentMonthYear,
         transactionList = transactionDetailList,
-        incomeAmount = viewModel.incomeAmount.collectAsState().value.toDecimalFormat(),
-        expenseAmount = viewModel.expenseAmount.collectAsState().value.toDecimalFormat(),
-        totalAmount = totalAmount.toDecimalFormat(),
+        incomeAmount = viewModel.incomeAmount.collectAsState().value.toCurrencyFormat(),
+        expenseAmount = viewModel.expenseAmount.collectAsState().value.toCurrencyFormat(),
+        totalAmount = totalAmount.toCurrencyFormat(),
         onClick = { transaction ->
             viewModel.selectedTransaction = transaction
             openBottomSheet = true
@@ -210,15 +234,15 @@ private fun MainContent(
                         if (transaction.toWalletGroup != null && transaction.toWallet != null) {
                             "${transaction.toWalletGroup?.name}/${transaction.toWallet?.name}"
                         } else null,
-                    amount = transaction.transaction.amount.toDecimalFormat(),
+                    amount = transaction.transaction.amount.toCurrencyFormat(),
                     note = transaction.transaction.note,
                     isLatestTimeOfDate = transaction.transaction.dateTime.substring(
-                        startIndex = 9,
-                        endIndex = 11
+                        startIndex = 1,
+                        endIndex = 3
                     ) != date,
                     onClick = { onClick(transaction) }
                 )
-                date = transaction.transaction.dateTime.substring(startIndex = 9, endIndex = 11)
+                date = transaction.transaction.dateTime.substring(startIndex = 1, endIndex = 3)
             }
         }
     }
@@ -227,7 +251,8 @@ private fun MainContent(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ModalBottomSheetContent(
-    transactionData: TransactionDetailDomain? = null
+    transactionData: TransactionDetailDomain? = null,
+    onDelete: (Int) -> Unit = {}
 ) {
     transactionData?.let {
         val bitmapImage =
@@ -252,18 +277,30 @@ private fun ModalBottomSheetContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(24.dp, alignment = Alignment.End)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = null
-                )
-                Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = null
-                )
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null
-                )
+                IconButton(
+                    onClick = {}
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null
+                    )
+                }
+                IconButton(
+                    onClick = {}
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null
+                    )
+                }
+                IconButton(
+                    onClick = { onDelete(transactionData.transaction.id) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null
+                    )
+                }
             }
             // Area untuk detail transaksi
             Column {
@@ -283,16 +320,16 @@ private fun ModalBottomSheetContent(
                             ) {
                                 TitleAndValue(
                                     title = "Transfer Net",
-                                    value = "Rp ${transactionData.transaction.amount.toDecimalFormat()}",
+                                    value = "Rp ${transactionData.transaction.amount.toCurrencyFormat()}",
                                     subValue = "Total: Rp ${
                                         (transactionData.transaction.amount.plus(
                                             transactionData.transaction.transferFee
-                                        )).toDecimalFormat()
+                                        )).toCurrencyFormat()
                                     }"
                                 )
                                 TitleAndValue(
                                     title = "Biaya Transfer",
-                                    value = "Rp ${transactionData.transaction.transferFee.toDecimalFormat()}"
+                                    value = "Rp ${transactionData.transaction.transferFee.toCurrencyFormat()}"
                                 )
                             }
                             TitleAndValue(
@@ -309,7 +346,7 @@ private fun ModalBottomSheetContent(
                         else {
                             TitleAndValue(
                                 title = "Total Transaksi",
-                                value = "Rp ${transactionData.transaction.amount.toDecimalFormat()}"
+                                value = "Rp ${transactionData.transaction.amount.toCurrencyFormat()}"
                             )
                             TitleAndValue(
                                 title = "Kategori",

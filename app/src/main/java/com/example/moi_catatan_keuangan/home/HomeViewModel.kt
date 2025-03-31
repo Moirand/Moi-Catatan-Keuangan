@@ -144,4 +144,7 @@ class HomeViewModel(
                 emit(transactionDetailList.toList())
             }
         }
+
+    fun deleteTransaction(transactionId: Int): Flow<UiState<Unit>> =
+        transactionRepository.deleteTransaction(transactionId)
 }
