@@ -2,6 +2,7 @@ package com.example.data.repository
 
 import androidx.sqlite.db.SimpleSQLiteQuery
 import com.example.data.dataSource.local.room.dao.TransactionDao
+import com.example.data.toData
 import com.example.data.toDomain
 import com.example.domain.UiState
 import com.example.domain.model.TransactionDomain
@@ -15,7 +16,7 @@ import java.math.BigDecimal
 
 class TransactionRepositoryImpl(
     private val transactionDao: TransactionDao
-): TransactionRepository {
+) : TransactionRepository {
     override fun getTransactions(query: SimpleSQLiteQuery): Flow<UiState<List<TransactionDomain?>>> =
         flow {
             emit(UiState.Loading())
@@ -36,6 +37,22 @@ class TransactionRepositoryImpl(
         flow {
             emit(UiState.Loading())
             emit(UiState.Success(transactionDao.calculateAmounts(query)))
+        }.catch { e ->
+            emit(UiState.Error(e.message.toString()))
+        }.flowOn(Dispatchers.IO)
+
+    override fun insertTransaction(transaction: TransactionDomain): Flow<UiState<Unit>> =
+        flow {
+            emit(UiState.Loading())
+            emit(UiState.Success(transactionDao.insertTransaction(transaction.toData())))
+        }.catch { e ->
+            emit(UiState.Error(e.message.toString()))
+        }.flowOn(Dispatchers.IO)
+
+    override fun deleteTransaction(transactionId: Int): Flow<UiState<Unit>> =
+        flow {
+            emit(UiState.Loading())
+            emit(UiState.Success(transactionDao.deleteTransaction(transactionId)))
         }.catch { e ->
             emit(UiState.Error(e.message.toString()))
         }.flowOn(Dispatchers.IO)

@@ -2,6 +2,7 @@ package com.example.moi_catatan_keuangan
 
 import android.app.Application
 import com.example.di.moduleKoin
+import com.example.moi_catatan_keuangan.addTransaction.AddTransactionViewModel
 import com.example.moi_catatan_keuangan.home.HomeViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -26,4 +27,5 @@ class MyApplication : Application() {
 
 val viewModelKoin = module {
     viewModel { HomeViewModel(get(), get(), get(), get()) }
+    viewModel { AddTransactionViewModel(get()) }
 }

@@ -1,7 +1,6 @@
 package com.example.data.dataSource.local.room.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -28,6 +27,6 @@ interface TransactionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertTransaction(transaction: Transaction)
 
-    @Delete
-    fun deleteTransaction(transaction: Transaction)
+    @Query("DELETE FROM ${TransactionColumn.TABLE_NAME} WHERE ${TransactionColumn.COLUMN_ID} = :transactionId")
+    fun deleteTransaction(transactionId: Int)
 }

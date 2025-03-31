@@ -7,11 +7,11 @@ data class TransactionDomain(
     val id: Int = 0,
     val dateTime: String,
     val type: TransactionType,
-    val categoryId: Int?,
+    val categoryId: Int? = null,
     val fromWalletId: Int,
-    val toWalletId: Int?,
-    val amount: BigDecimal,
-    val transferFee: BigDecimal,
-    val note: String?,
-    val receipt: ByteArray?
+    val toWalletId: Int? = null,
+    val amount: BigDecimal = BigDecimal.ZERO,
+    val transferFee: BigDecimal = BigDecimal.ZERO,
+    val note: String? = null,
+    val receipt: ByteArray? = null
 )

@@ -23,6 +23,20 @@ fun Transaction.toDomain(): TransactionDomain =
         receipt = receipt
     )
 
+fun TransactionDomain.toData(): Transaction =
+    Transaction(
+        id = id,
+        dateTime = dateTime,
+        type = type,
+        categoryId = categoryId,
+        fromWalletId = fromWalletId,
+        toWalletId = toWalletId,
+        amount = amount,
+        transferFee = transferFee,
+        note = note,
+        receipt = receipt
+    )
+
 fun Category.toDomain(): CategoryDomain =
     CategoryDomain(
         id = id,
