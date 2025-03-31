@@ -2,31 +2,31 @@
   "transactions": [
     {
       "id": 1,
-      "date_time": "2025-03-02 04:30:00",
+      "date_time": "02-04-2025 04:30",
       "type": "Income",
       "category_id": 2,
       "from_wallet_id": 3,
       "to_wallet_id": null,
-      "amount": 1000,
+      "amount": 1000000.55,
       "transfer_fee": 0,
       "note": null,
       "receipt": null
     },
     {
       "id": 2,
-      "date_time": "2025-03-10 14:30:00",
+      "date_time": "10-04-2025 14:30",
       "type": "Expense",
       "category_id": 3,
       "from_wallet_id": 2,
       "to_wallet_id": null,
-      "amount": 5000,
+      "amount": 50000.12,
       "transfer_fee": 0,
       "note": null,
       "receipt": null
     },
     {
       "id": 3,
-      "date_time": "2025-03-10 10:30:00",
+      "date_time": "10-04-2025 10:30",
       "type": "Transfer",
       "category_id": null,
       "from_wallet_id": 1,

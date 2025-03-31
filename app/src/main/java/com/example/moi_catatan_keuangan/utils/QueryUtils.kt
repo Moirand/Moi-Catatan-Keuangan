@@ -10,10 +10,10 @@ object QueryUtils {
     fun getTransactionsByMonthYear(month: Int, year: Int): SimpleSQLiteQuery =
         SimpleSQLiteQuery(
             """
-            SELECT * 
-            FROM ${TransactionColumn.TABLE_NAME} 
+            SELECT *
+            FROM ${TransactionColumn.TABLE_NAME}
             WHERE ${TransactionColumn.COLUMN_DATE_TIME}
-            LIKE '${year}-${String.format("%02d", month)}%'
+            LIKE '%${String.format("%02d", month)}-${year}%'
             ORDER BY ${TransactionColumn.COLUMN_DATE_TIME} DESC
             """.trimMargin()
         )
@@ -21,10 +21,10 @@ object QueryUtils {
     fun calculateIncomeAmounts(month: Int, year: Int): SimpleSQLiteQuery =
         SimpleSQLiteQuery(
             """
-            SELECT SUM(${TransactionColumn.COLUMN_AMOUNT}) 
-            FROM ${TransactionColumn.TABLE_NAME} 
+            SELECT SUM(${TransactionColumn.COLUMN_AMOUNT})
+            FROM ${TransactionColumn.TABLE_NAME}
             WHERE ${TransactionColumn.COLUMN_DATE_TIME}
-            LIKE '${year}-${String.format("%02d", month)}%'
+            LIKE '%${String.format("%02d", month)}-${year}%'
             AND ${TransactionColumn.COLUMN_TYPE} = '${TransactionType.Income}'
             """.trimIndent()
         )
@@ -34,20 +34,20 @@ object QueryUtils {
             """
             SELECT (IFNULL(expense_amounts, 0) + IFNULL(transfer_fee, 0)) AS total_expense
             FROM (
-                SELECT 
+                SELECT
                     (
-                        SELECT SUM(${TransactionColumn.COLUMN_AMOUNT}) 
-                        FROM ${TransactionColumn.TABLE_NAME} 
+                        SELECT SUM(${TransactionColumn.COLUMN_AMOUNT})
+                        FROM ${TransactionColumn.TABLE_NAME}
                         WHERE ${TransactionColumn.COLUMN_DATE_TIME}
-                        LIKE '${year}-${String.format("%02d", month)}%'
+                        LIKE '%${String.format("%02d", month)}-${year}%'
                         AND ${TransactionColumn.COLUMN_TYPE} = '${TransactionType.Expense}'
                     ) AS expense_amounts,
                     
                     (
-                        SELECT SUM(${TransactionColumn.COLUMN_TRANSFER_FEE}) 
-                        FROM ${TransactionColumn.TABLE_NAME} 
+                        SELECT SUM(${TransactionColumn.COLUMN_TRANSFER_FEE})
+                        FROM ${TransactionColumn.TABLE_NAME}
                         WHERE ${TransactionColumn.COLUMN_DATE_TIME}
-                        LIKE '${year}-${String.format("%02d", month)}%'
+                        LIKE '%${String.format("%02d", month)}-${year}%'
                         AND ${TransactionColumn.COLUMN_TYPE} = '${TransactionType.Transfer}'
                     ) AS transfer_fee
                 )

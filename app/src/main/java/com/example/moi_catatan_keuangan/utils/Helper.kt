@@ -1,6 +1,8 @@
 package com.example.moi_catatan_keuangan.utils
 
+import android.content.Context
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import java.math.BigDecimal
 import java.text.DecimalFormat
@@ -13,7 +15,7 @@ import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun reformatDateTime(input: String): String {
-    val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    val inputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
     val outputFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, HH:mm", Locale("id", "ID"))
 
     val dateTime = LocalDateTime.parse(input, inputFormatter)
@@ -28,8 +30,10 @@ fun getDayName(input: String): String {
     return outputFormat.format(date)
 }
 
-fun BigDecimal.toDecimalFormat(): String {
+fun BigDecimal.toCurrencyFormat(): String {
     val symbols = DecimalFormatSymbols(Locale("id", "ID"))
-    val formatter = DecimalFormat("#,###", symbols)
+    val formatter = DecimalFormat("#,###.##", symbols)
     return formatter.format(this)
 }
+
+fun Context.makeToast(message: String) = Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
