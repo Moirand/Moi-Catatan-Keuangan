@@ -63,18 +63,19 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val currentMonthYear by remember { mutableStateOf(LocalDate.now()) }
+    var refreshTransactions by remember { mutableStateOf(false) }
 
-    val transactionListState by remember {
+    val transactionListState by remember(currentMonthYear, refreshTransactions) {
         viewModel.getTransactionList(currentMonthYear.monthValue, currentMonthYear.year)
     }.collectAsState(UiState.Loading())
 
     val transactionDetailList by remember { viewModel.transactionListDetail }.collectAsState(listOf())
 
-    val incomeAmountState by remember {
+    val incomeAmountState by remember(currentMonthYear, refreshTransactions) {
         viewModel.calculateIncomeAmount(currentMonthYear.monthValue, currentMonthYear.year)
     }.collectAsState(UiState.Loading())
 
-    val expenseAmountState by remember {
+    val expenseAmountState by remember(currentMonthYear, refreshTransactions) {
         viewModel.calculateExpenseAmount(currentMonthYear.monthValue, currentMonthYear.year)
     }.collectAsState(UiState.Loading())
 
@@ -142,6 +143,7 @@ fun HomeScreen(
 
                                     is UiState.Success -> {
                                         openBottomSheet = false
+                                        refreshTransactions = !refreshTransactions
                                     }
                                 }
                             }
