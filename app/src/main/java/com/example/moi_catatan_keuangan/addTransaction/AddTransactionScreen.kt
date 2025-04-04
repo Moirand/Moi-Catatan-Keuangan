@@ -9,22 +9,19 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +61,9 @@ fun AddTransactionScreen(
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
     viewModel: AddTransactionViewModel = koinViewModel(),
+    scope: CoroutineScope = rememberCoroutineScope(),
+    onSave: (isSaved: Boolean) -> Unit = {}, // Callback untuk memberitahukan bahwa transaksi berhasil disimpan
+    onSaveButtonClick: (() -> Unit) -> Unit = {} // Callback untuk mengirimkan aksi klik tombol save
 ) {
     val activeButtonContainerColor = Color.Blue
     val activeButtonContentColor = Color.White
@@ -71,6 +71,12 @@ fun AddTransactionScreen(
     val inActiveButtonContentColor = Color.Blue
 
     var transactionType by remember { mutableStateOf(TransactionType.Income) }
+    var isSaveButtonClicked by remember { mutableStateOf(false) } // State untuk menandakan tombol save di TopBar diklik
+
+    // Kirimkan aksi yang akan dijalankan ketika tombol save di TopBar diklik
+    onSaveButtonClick {
+        isSaveButtonClicked = true
+    }
 
     Column(
         modifier = modifier
@@ -156,7 +162,18 @@ fun AddTransactionScreen(
         if (transactionType == TransactionType.Transfer) TransferContent()
         else IncomExpenseContent(
             viewModel = viewModel,
-            transactionType = transactionType
+            transactionType = transactionType,
+            isSaveButtonClicked = isSaveButtonClicked,
+            onSaveSuccess = { toast ->
+                toast()
+                onSave(true)
+                isSaveButtonClicked = false
+            },
+            onSaveFailed = { toast ->
+                toast()
+                onSave(false)
+                isSaveButtonClicked = false
+            }
         )
     }
 }
@@ -168,6 +185,9 @@ private fun IncomExpenseContent(
     scope: CoroutineScope = rememberCoroutineScope(),
     viewModel: AddTransactionViewModel,
     transactionType: TransactionType,
+    isSaveButtonClicked: Boolean = false,
+    onSaveSuccess: (() -> Unit) -> Unit = {},
+    onSaveFailed: (() -> Unit) -> Unit = {}
 ) {
     val categoryList: List<CategoryDomain> = listOf(
         CategoryDomain(
@@ -229,7 +249,6 @@ private fun IncomExpenseContent(
     var selectedWallet by remember { mutableStateOf(Pair<Int?, String>(null, "")) }
     var note by remember { mutableStateOf("") }
 
-    // Function to save the transaction
     fun saveTransaction() {
         if (selectedDate.isNotEmpty()
             && selectedTime.isNotEmpty()
@@ -247,21 +266,27 @@ private fun IncomExpenseContent(
                     note = note
                 )
 
-                viewModel.insertTransaction(transaction).collect {
-                    when (it) {
+                viewModel.insertTransaction(transaction).collect { state ->
+                    when (state) {
                         is UiState.Loading -> {}
                         is UiState.Error -> {
-                            context.makeToast("Transaksi Gagal Ditambahkan")
+                            onSaveFailed { context.makeToast("Transaksi Gagal Ditambahkan") }
                         }
 
                         is UiState.Success -> {
-                            context.makeToast("Transaksi Berhasil Ditambahkan")
+                            onSaveSuccess { context.makeToast("Transaksi Berhasil Ditambahkan") }
                         }
                     }
                 }
             }
         } else {
-            context.makeToast("Mohon lengkapi data transaksi")
+            onSaveFailed { context.makeToast("Mohon lengkapi data transaksi") }
+        }
+    }
+
+    LaunchedEffect(isSaveButtonClicked) {
+        if (isSaveButtonClicked) {
+            saveTransaction()
         }
     }
 
@@ -390,15 +415,6 @@ private fun IncomExpenseContent(
                     text = "Upload Gambar"
                 )
             }
-        }
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { saveTransaction() }
-        ) {
-            Icon(imageVector = Icons.Default.Check, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Simpan Transaksi")
         }
     }
 }
