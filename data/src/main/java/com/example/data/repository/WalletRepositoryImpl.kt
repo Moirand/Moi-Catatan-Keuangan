@@ -14,10 +14,26 @@ import kotlinx.coroutines.flow.flowOn
 class WalletRepositoryImpl(
     private val walletDao: WalletDao
 ) : WalletRepository {
+    override fun getWallets(): Flow<UiState<List<WalletDomain?>>> =
+        flow {
+            emit(UiState.Loading())
+            emit(UiState.Success(walletDao.getWallets().map { it?.toDomain() }))
+        }.catch { e ->
+            emit(UiState.Error(e.message.toString()))
+        }.flowOn(Dispatchers.IO)
+
     override fun getWalletById(walletId: Int): Flow<UiState<WalletDomain?>> =
         flow {
             emit(UiState.Loading())
             emit(UiState.Success(walletDao.getWalletById(walletId)?.toDomain()))
+        }.catch { e ->
+            emit(UiState.Error(e.message.toString()))
+        }.flowOn(Dispatchers.IO)
+
+    override fun getWalletsByWalletGroupId(walletGroupId: Int): Flow<UiState<List<WalletDomain?>>> =
+        flow {
+            emit(UiState.Loading())
+            emit(UiState.Success(walletDao.getWalletsByWalletGroupId(walletGroupId).map { it?.toDomain() }))
         }.catch { e ->
             emit(UiState.Error(e.message.toString()))
         }.flowOn(Dispatchers.IO)

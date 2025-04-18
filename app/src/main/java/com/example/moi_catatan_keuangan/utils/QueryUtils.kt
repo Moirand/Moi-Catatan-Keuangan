@@ -21,7 +21,7 @@ object QueryUtils {
     fun calculateIncomeAmounts(month: Int, year: Int): SimpleSQLiteQuery =
         SimpleSQLiteQuery(
             """
-            SELECT SUM(${TransactionColumn.COLUMN_AMOUNT})
+            SELECT IFNULL(SUM(${TransactionColumn.COLUMN_AMOUNT}), 0)
             FROM ${TransactionColumn.TABLE_NAME}
             WHERE ${TransactionColumn.COLUMN_DATE_TIME}
             LIKE '%${String.format("%02d", month)}-${year}%'

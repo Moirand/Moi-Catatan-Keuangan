@@ -5,5 +5,6 @@ import com.example.domain.model.WalletGroupDomain
 import kotlinx.coroutines.flow.Flow
 
 interface WalletGroupRepository {
+    fun getWalletGroups(): Flow<UiState<List<WalletGroupDomain?>>>
     fun getWalletGroupById(walletGroupId: Int): Flow<UiState<WalletGroupDomain?>>
 }

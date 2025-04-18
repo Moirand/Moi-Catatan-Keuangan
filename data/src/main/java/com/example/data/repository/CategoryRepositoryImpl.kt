@@ -3,6 +3,7 @@ package com.example.data.repository
 import com.example.data.dataSource.local.room.dao.CategoryDao
 import com.example.data.toDomain
 import com.example.domain.UiState
+import com.example.domain.constant.CategoryType
 import com.example.domain.model.CategoryDomain
 import com.example.domain.repository.CategoryRepository
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +14,15 @@ import kotlinx.coroutines.flow.flowOn
 
 class CategoryRepositoryImpl(
     private val categoryDao: CategoryDao
-): CategoryRepository {
+) : CategoryRepository {
+    override fun getCategoriesByType(categoryType: CategoryType): Flow<UiState<List<CategoryDomain?>>> =
+        flow {
+            emit(UiState.Loading())
+            emit(UiState.Success(categoryDao.getCategoriesByType(categoryType).map { it?.toDomain() }))
+        }.catch { e ->
+            emit(UiState.Error(e.message.toString()))
+        }.flowOn(Dispatchers.IO)
+
     override fun getCategoryById(categoryId: Int): Flow<UiState<CategoryDomain?>> =
         flow {
             emit(UiState.Loading())

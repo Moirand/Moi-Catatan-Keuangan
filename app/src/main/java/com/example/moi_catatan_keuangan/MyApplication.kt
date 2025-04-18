@@ -27,5 +27,5 @@ class MyApplication : Application() {
 
 val viewModelKoin = module {
     viewModel { HomeViewModel(get(), get(), get(), get()) }
-    viewModel { AddTransactionViewModel(get()) }
+    viewModel { AddTransactionViewModel(get(), get(), get(), get()) }
 }
